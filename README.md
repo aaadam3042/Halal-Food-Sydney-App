@@ -1,2 +1,2 @@
-# Australian-Zakaat-Directory-WebApp
+# Islamic-Charity-Directory-Aus-WebApp
 Python/Javascript web application providing a directory/portal for zakaat and charity organisations located in Australia, highlighting key features of the charities

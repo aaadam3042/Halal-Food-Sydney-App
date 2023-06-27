@@ -69,9 +69,12 @@ Contributers are required to set up a local postgresql database to test the appl
 
 1. Download postgresql from the following page: https://www.postgresql.org/download/
 2. Install postgresql and set up and start a server
-3. In `src/server/app.py` change the value of `app.config['SQLALCHEMY_DATABASE_URI']` to `'postgresql://localhost:[Port of database]/[Name of database]'`
-4. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes. Ensure that all pip requirements were installed before this
-5. Start contributing!
+3. Install requirements using (while in `/backend/`):
+`pip install -r requirements.txt`
+4. Create a new file called `.env`. The path should be `/backend/.env`
+5. Add the following line to .env: `'DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where db port and name refer to the values of the previously set up database. Details can be found on the postgres application
+6. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes
+7. Start contributing!
 
 **When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db migrate` to apply, before commiting to git 
 

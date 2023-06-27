@@ -68,11 +68,11 @@ Routes in seperate files should also have a seperate file for tests, however the
 Contributers are required to set up a local postgresql database to test the application.
 
 1. Download postgresql from the following page: https://www.postgresql.org/download/
-2. Install postgresql and set up and start a server
+2. Install postgresql and set up and start a server using the installed postgresql application (Keep the server running while developing)
 3. Install requirements using (while in `/backend/`):
 `pip install -r requirements.txt`
-4. Create a new file called `.env`. The path should be `/backend/.env`
-5. Add the following line to .env: `'DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where db port and name refer to the values of the previously set up database. Details can be found on the postgres application
+4. Create a new file called `.env`. The path should be `/backend/.env` (Don't need to do anything here if it already exists)
+5. Add the following line to .env: `'DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where `db port` and `db name` refer to the values of the database you just set up. Details can be found on your running instance of the postgres server
 6. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes
 7. Start contributing!
 

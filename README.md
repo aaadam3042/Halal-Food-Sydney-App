@@ -2,8 +2,10 @@
 Python/Javascript web application providing a directory/portal for zakaat and charity organisations located in Australia, highlighting key features of the charities
 
 ## Technology
-This project is built on top of React(TypeScript), Flask and mySQL.
+This project is built on top of React(TypeScript), Flask and Postgresql.
 Additionally MaterialUI is used for React components
+
+---
 
 ## To contribute:
 ### Frontend:
@@ -13,7 +15,11 @@ Additionally MaterialUI is used for React components
 3. Start contributing!
 4. To test run the backend, and then run `npm start` in the frontend directory
 
+---
+
 ### Backend:
+
+#### **Flask App:**
 
 1. Navigate to the backend directory in terminal
 `cd backend`
@@ -25,7 +31,7 @@ source venv/bin/activate
 3. Ensure that python is running from the virtual environment
 `which python3`
 OR
-`which python`
+`which python`.
 Output should be directory ending in `venv/bin/python3` or similar
 4. Install requirements using:
 `pip install -r requirements.txt`
@@ -39,3 +45,66 @@ If using MacOS and the interpreter does not seem to be set correctly, it is like
 **When commiting changes:** If adding dependencies to the codebase run:
 `pip freeze > requirements.txt`
 **Note:** Ensure the correct interpreter is used on the terminal running this command
+
+#### **Tests:**
+
+Ensure all routes have tests associated with them before making a pull request. 
+Tests are to be located in `src/tests/` and all files should end in _tests.py.
+
+Routes in seperate files should also have a seperate file for tests, however these files should be located directly in the `tests/` directory. For e.g:
+
+`src/server/admin/routes.py` -> `src/tests/admin_tests.py`
+
+---
+
+#### **Database:**
+
+Contributers are required to set up a local postgresql database to test the application.
+
+1. Download postgresql from the following page: https://www.postgresql.org/download/
+2. Install postgresql and set up and start a server
+3. In `src/server/app.py` change the value of `app.config['SQLALCHEMY_DATABASE_URI']` to `'postgresql://localhost:[Port of database]/[Name of database]'`
+4. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes. Ensure that all pip requirements were installed before this
+5. Start contributing!
+
+**When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db migrate` to apply, before commiting to git 
+
+**Image locations:** Images are stored in the database as a string representing their URL. The images themselves are to be stored in `servers/charities/upload/images` for charity organisation images.
+
+**Database Schema:**
+
+| User          |                  |     
+| ------------- | ---------------- |     
+| id: int       | Primary key      |     
+| email: str    | Unique, NOT NULL |     
+| isAdmin: bool | NOT NULL         |     
+
+
+| Charity            |                  |
+| ------------------ | ---------------- |
+| id: int            | Primary key      |
+| name: str          | Unique, NOT NULL |
+| logoURL: str       | NOT NULL         |
+| storefrontURL: str | NULLABLE         |
+| adminFees: bool    | NULLABLE         |
+| distribution: bool | NULLABLE         |
+
+
+| Contact        |                       |
+| -------------- | --------------------- |
+| id: int        | Primary key           |
+| charityID: int | Foreign Key, NOT NULL |
+| type: str      | NOT NULL, NOT NULL    |
+| value: str     | NULLABLE, NOT NULL    |
+
+
+| Category  |                  |
+| --------- | ---------------- |
+| id: int   | Primary key      |
+| name: str | Unique, NOT NULL |
+
+
+| CharityCategory  |              |
+| ---------------- | -----------  |
+| charityID: int   | Foreignt key |
+| categoryID: int  | Foreignt key |

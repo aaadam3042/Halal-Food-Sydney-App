@@ -1,5 +1,7 @@
+from dotenv import dotenv_values
 from flask import Flask, Blueprint, Response, jsonify
 from flask_migrate import Migrate
+from os import getenv
 
 from server.admin.routes import admin_bp
 from server.charities.routes import charities_bp
@@ -13,9 +15,12 @@ from server.model import db
 # Routes in this file have the url prefix of /api
 ###
 
+dotenv_values('.env')
+
 # Set up the flask app 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/aaadam3042'
+db_url = getenv('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -32,7 +37,6 @@ def index() -> Response:
 app.register_blueprint(api_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(charities_bp)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

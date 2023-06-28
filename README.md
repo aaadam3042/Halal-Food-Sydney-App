@@ -45,6 +45,7 @@ Output should be directory ending in `venv/bin/python3` or similar
 6. To test routes, run `python server.py` or similar
 
 **If using an IDE:** Make sure to set the interpreter to the one located `venv/bin/python3`
+
 **Troubleshooting:** 
 If using MacOS and the interpreter does not seem to be set correctly, it is likely that this is due to symlinks. A solution would be to use a different interpreter which has all the requirements installed. This can be done by installing the requirements file on any python version and then setting it as the version to be used by the interpreter.
 
@@ -52,7 +53,11 @@ If using MacOS and the interpreter does not seem to be set correctly, it is like
 `pip freeze > requirements.txt`
 **Note:** Ensure the correct interpreter is used on the terminal running this command
 
-#### **Tests:**
+---
+
+#### **Backend Tests:**
+
+**Making tests:**
 
 Ensure all routes have tests associated with them before making a pull request. 
 Tests are to be located in `src/tests/` and all files should end in _tests.py.
@@ -60,6 +65,18 @@ Tests are to be located in `src/tests/` and all files should end in _tests.py.
 Routes in seperate files should also have a seperate file for tests, however these files should be located directly in the `tests/` directory. For e.g:
 
 `src/server/admin/routes.py` -> `src/tests/admin_tests.py`
+
+**Running tests:**
+
+Run tests with the following line in terminal: `pytest` 
+
+**Troubleshooting:**
+
+If pytest fails due to a module error, try:
+
+MacOS/Linux: `export PYTHONPATH=/Absoulte/path/to/backend/src/server `
+
+Windows: `set PYTHONPATH=C:\Absolute\path\to\backend\src\server`
 
 ---
 

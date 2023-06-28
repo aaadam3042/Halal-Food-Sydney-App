@@ -1,11 +1,11 @@
 from dotenv import dotenv_values
 from flask import Flask, Blueprint, Response, jsonify
 from flask_migrate import Migrate
-from os import getenv
+from os import getenv, path
 
-from server.admin.routes import admin_bp
-from server.charities.routes import charities_bp
-from server.model import db
+from admin.routes import admin_bp
+from charities.routes import charities_bp
+from model import db, User
 
 ###
 # Backend entrypoint
@@ -15,22 +15,31 @@ from server.model import db
 # Routes in this file have the url prefix of /api
 ###
 
-dotenv_values('.env')
+currentDir = path.dirname(path.abspath(__file__))
+envPath = path.join(currentDir, '.env')
+env = dotenv_values(envPath)
 
 # Set up the flask app 
 app = Flask(__name__)
-db_url = getenv('DATABASE_URL')
+db_url = env["DATABASE_URL"]
+print(db_url)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
 
-# Base route
 api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+# Base route
 @api_bp.route("/", methods=["GET"])
 def index() -> Response:
     return jsonify({"api_version": "1.0.0"})
+
+@api_bp.route("/users/", methods=["GET"])
+def getUsers() -> Response:
+    users = User.query.all()
+    return jsonify(users)
 
 
 # Register all blueprints

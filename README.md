@@ -88,7 +88,7 @@ Contributers are required to set up a local postgresql database to test the appl
 2. Install postgresql and set up and start a server using the installed postgresql application (Keep the server running while developing)
 3. Install requirements using (while in `/backend/`):
 `pip install -r requirements.txt`
-4. Create a new file called `.env`. The path should be `/backend/.env` (Don't need to do anything here if it already exists)
+4. Create a new file called `.env`. The path should be `/backend/src/server/.env` (Don't need to create new if it already exists)
 5. Add the following line to .env: `'DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where `db port` and `db name` refer to the values of the database you just set up. Details can be found on your running instance of the postgres server
 6. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes
 7. Start contributing!

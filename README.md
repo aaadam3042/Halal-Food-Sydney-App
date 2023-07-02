@@ -132,5 +132,13 @@ Contributers are required to set up a local postgresql database to test the appl
 
 | CharityCategory  |              |
 | ---------------- | -----------  |
-| charityID: int   | Foreignt key |
-| categoryID: int  | Foreignt key |
+| charityID: int   | Foreign Key  |
+| categoryID: int  | Foreign Key  |
+
+| Location       |             |
+| -------------- | ----------- |
+| id: int        | Primary Key |
+| charityID: int | Foreign Key |
+| Street: str    | Foreign Key |
+| Suburb: str    | Foreign Key |
+| State: str     | Foreign Key |

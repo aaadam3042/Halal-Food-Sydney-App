@@ -40,4 +40,10 @@ class Category(db.Model):
 class CharityCategory(db.Model):
     charityID = db.Column(db.Integer, db.ForeignKey('charity.id'), primary_key=True)
     categoryID = db.Column(db.Integer, db.ForeignKey('category.id'), primary_key=True)
-    
+
+class Location(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    charityID = db.Column(db.Integer, db.ForeignKey('charity.id'), primary_key=True)
+    street = db.Column(db.String, nullable=False)
+    suburb = db.Column(db.String, nullable=False)
+    state = db.Column(db.String, nullable=False)

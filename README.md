@@ -93,7 +93,7 @@ Contributers are required to set up a local postgresql database to test the appl
 6. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes
 7. Start contributing!
 
-**When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db migrate` to apply, before commiting to git 
+**When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db upgrade` to apply, before commiting to git 
 
 **Image locations:** Images are stored in the database as a string representing their URL. The images themselves are to be stored in `servers/charities/upload/images` for charity organisation images.
 
@@ -139,6 +139,6 @@ Contributers are required to set up a local postgresql database to test the appl
 | -------------- | ----------- |
 | id: int        | Primary Key |
 | charityID: int | Foreign Key |
-| Street: str    | Foreign Key |
-| Suburb: str    | Foreign Key |
-| State: str     | Foreign Key |
+| street: str    | NOT NULL    |
+| suburb: str    | NOT NULL    |
+| state: str     | NOT NULL    |

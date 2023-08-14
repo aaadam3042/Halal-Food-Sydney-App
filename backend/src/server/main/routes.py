@@ -6,11 +6,11 @@ from flask import Blueprint, Response, jsonify
 # All routes in this file should have a url prefix of /api/charities
 ###
 
-charities_bp = Blueprint("charities", import_name=__name__, url_prefix="/api/charities")
+main_bp = Blueprint("charities", import_name=__name__, url_prefix="/api/main")
 
-@charities_bp.route("/", methods=["GET"])
+@main_bp.route("/", methods=["GET"])
 def index() -> Response:
     '''
     Template route
     '''
-    return jsonify({"charities_api_version": "1.0.0"})
+    return jsonify({"main_api_version": "1.0.0"})

@@ -5,7 +5,7 @@ from os import getenv, path
 from typing import Tuple
 
 from admin.routes import admin_bp
-from charities.routes import charities_bp
+from main.routes import main_bp
 from model import db, User
 
 ###
@@ -87,7 +87,7 @@ def newUser() -> Tuple[Response, int]:
 # Register all blueprints
 app.register_blueprint(api_bp)
 app.register_blueprint(admin_bp)
-app.register_blueprint(charities_bp)
+app.register_blueprint(main_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)

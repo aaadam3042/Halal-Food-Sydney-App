@@ -1,16 +1,17 @@
-# Islamic-Charity-Portal-Aus-WebApp
-Python/Javascript web application providing a directory/portal for zakaat and charity organisations located in Australia, highlighting key features of the charities
+# Halal Food Sydney
+Python/Javascript web application providing a directory of halal location in
+Sydeny, Australia.
 
 ## Technology
 This project is built on top of React(TypeScript), Flask and Postgresql.
-Additionally MaterialUI is used for React components
+Additionally MaterialUI is used for React components.
 
 ---
 
 ## To contribute:
 Start by navigating to a folder in a terminal/cmd of your choice then run:
 
-`git clone https://github.com/aaadam3042/Islamic-Charity-Portal-AUS-WebApp.git`
+`git clone https://github.com/aaadam3042/Halal-Food-Sydney-Web-App.git`
 
 ---
 
@@ -42,7 +43,7 @@ Output should be directory ending in `venv/bin/python3` or similar
 4. Install requirements using:
 `pip install -r requirements.txt`
 5. Start contributing!
-6. To test routes, run `python server.py` or similar
+6. To manually test routes, run `python server.py` or similar, then make relevant calls
 
 **If using an IDE:** Make sure to set the interpreter to the one located `venv/bin/python3`
 
@@ -89,56 +90,10 @@ Contributers are required to set up a local postgresql database to test the appl
 3. Install requirements using (while in `/backend/`):
 `pip install -r requirements.txt`
 4. Create a new file called `.env`. The path should be `/backend/src/server/.env` (Don't need to create new if it already exists)
-5. Add the following line to .env: `'DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where `db port` and `db name` refer to the values of the database you just set up. Details can be found on your running instance of the postgres server
+5. Add the following line to .env: `DATABASE_URL='postgresql://localhost:[db port]/[db name]'`, where `db port` and `db name` refer to the values of the database you just set up. Details can be found on your running instance of the postgres server
 6. Using a terminal in `src/server/` run `flask db migrate` to apply any database changes
 7. Start contributing!
 
 **When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db upgrade` to apply, before commiting to git 
 
-**Image locations:** Images are stored in the database as a string representing their URL. The images themselves are to be stored in `servers/charities/upload/images` for charity organisation images.
-
-**Database Schema:**
-
-| User          |                  |     
-| ------------- | ---------------- |     
-| id: int       | Primary key      |     
-| email: str    | Unique, NOT NULL |     
-| isAdmin: bool | NOT NULL         |     
-
-
-| Charity            |                  |
-| ------------------ | ---------------- |
-| id: int            | Primary key      |
-| name: str          | Unique, NOT NULL |
-| logoURL: str       | NOT NULL         |
-| storefrontURL: str | NULLABLE         |
-| adminFees: bool    | NULLABLE         |
-| distribution: bool | NULLABLE         |
-
-
-| Contact        |                       |
-| -------------- | --------------------- |
-| id: int        | Primary key           |
-| charityID: int | Foreign Key, NOT NULL |
-| type: str      | NOT NULL, NOT NULL    |
-| value: str     | NULLABLE, NOT NULL    |
-
-
-| Category  |                  |
-| --------- | ---------------- |
-| id: int   | Primary key      |
-| name: str | Unique, NOT NULL |
-
-
-| CharityCategory  |              |
-| ---------------- | -----------  |
-| charityID: int   | Foreign Key  |
-| categoryID: int  | Foreign Key  |
-
-| Location       |             |
-| -------------- | ----------- |
-| id: int        | Primary Key |
-| charityID: int | Foreign Key |
-| street: str    | NOT NULL    |
-| suburb: str    | NOT NULL    |
-| state: str     | NOT NULL    |
+**Image locations:** Images are stored in ...

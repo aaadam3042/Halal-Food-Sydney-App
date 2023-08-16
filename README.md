@@ -99,4 +99,6 @@ Contributers are required to set up a local postgresql database to test the appl
 
 **When changing the database schema:** Ensure that you run `flask db migrate -m "[Your message here]"`, then `flask db upgrade` to apply, before commiting to git 
 
+If flask db commands don't work, try applying the PYTHONPATH commands in the backend test section.
+
 **Image locations:** Images are stored in ...

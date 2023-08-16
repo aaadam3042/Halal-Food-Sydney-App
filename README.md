@@ -79,6 +79,9 @@ MacOS/Linux: `export PYTHONPATH=/Absoulte/path/to/backend/src/server `
 
 Windows: `set PYTHONPATH=C:\Absolute\path\to\backend\src\server`
 
+
+To ensure that the path has been set, run `echo $PYTHONPATH`
+
 ---
 
 #### **Database:**

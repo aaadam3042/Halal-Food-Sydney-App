@@ -3,22 +3,21 @@ Python/Javascript web application providing a directory of halal location in
 Sydeny, Australia.
 
 ## Technology
-This project is built on top of React(TypeScript), Flask and Postgresql.
-Additionally MaterialUI is used for React components.
+This project is built on top of React Native, Flask and Postgresql.
 
 ---
 
 ## To contribute:
 Start by navigating to a folder in a terminal/cmd of your choice then run:
 
-`git clone https://github.com/aaadam3042/Halal-Food-Sydney-Web-App.git`
+`git clone https://github.com/aaadam3042/Halal-Food-Sydney-App.git`
 
 ---
 
 ### Frontend:
 
 1. Ensure that npm is installed via this link: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Run npm install in terminal in the frontend directory
+2. Run `npm install` in terminal in the frontend directory
 3. Start contributing!
 4. To test: run the backend, and then run `npm start` in the frontend directory
 

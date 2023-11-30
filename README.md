@@ -10,6 +10,8 @@ Additionally the React Native Paper library is used to speed up development.
 
 ## Mockups
 These are some basic mockups for some pages. Design is not final.
+
+
 ![Mockups](https://github.com/aaadam3042/Halal-Food-Sydney-App/assets/69839172/e387b90d-98be-4499-b70d-d7032993491d)
 
 ---

@@ -4,6 +4,7 @@ Sydeny, Australia.
 
 ## Technology
 This project is built on top of React Native, Flask and Postgresql.
+Additionally the React Native Paper library is used to speed up development.
 
 ---
 

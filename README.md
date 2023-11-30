@@ -17,9 +17,10 @@ Start by navigating to a folder in a terminal/cmd of your choice then run:
 ### Frontend:
 
 1. Ensure that npm is installed via this link: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Run `npm install` in terminal in the frontend directory
-3. Start contributing!
-4. To test: run the backend, and then run `npm start` in the frontend directory
+2. Ensure that react-native dependencies are installed as per documentation: https://reactnative.dev/docs/environment-setup
+3. Run `npm install` in terminal in the frontend directory
+4. Start contributing!
+5. To test: run the backend, and then run `npm start` in the frontend directory
 
 ---
 

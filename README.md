@@ -44,7 +44,7 @@ Output should be directory ending in `venv/bin/python3` or similar
 4. Install requirements using:
 `pip install -r requirements.txt`
 5. Start contributing!
-6. To manually test routes, run `python server.py` or similar, then make relevant calls
+6. To manually test routes by running the server, run `python app.py` or similar, then make relevant calls
 
 **If using an IDE:** Make sure to set the interpreter to the one located `venv/bin/python3`
 

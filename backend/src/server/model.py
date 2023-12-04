@@ -70,7 +70,7 @@ class Supplier(db.Model):
     supplier = relationship('ServiceSupplier', backref='supplier', cascade='all, delete')
 
     def __repr__(self):
-        return f"<Supplier {self.name}: {self.status}>"
+        return f"<Supplier {self.name}>"
 
 class StatusHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)

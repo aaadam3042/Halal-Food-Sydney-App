@@ -64,25 +64,6 @@ def getUser() -> Response:
             "isAdmin": user.isAdmin
     })
 
-@api_bp.route("/users/new", methods=["PUT"])
-def newUser() -> Tuple[Response, int]:
-    # Create a new user
-    data = request.get_json()
-    if (not data or 'email' not in data or 'isAdmin' not in data):
-        abort(400, "Bad Request: Missing query parameters")
-
-    email = data['email']
-    isAdmin = data['isAdmin']
-
-    try:
-        isAdmin = int(isAdmin)
-    except:
-        abort(400, "Bad Request: Invalid value for 'isAdmin'")
-    newUser = User(email=email, isAdmin=isAdmin)
-    db.session.add(newUser)
-    db.session.commit()
-    return jsonify({'message': 'User succesfully created'}), 200
-
 
 # Register all blueprints
 app.register_blueprint(api_bp)

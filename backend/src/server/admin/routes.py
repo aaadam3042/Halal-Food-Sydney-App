@@ -1,8 +1,10 @@
 import os
 import binascii
+import csv
 from flask_bcrypt import Bcrypt
-from flask import Blueprint, Response, jsonify
+from flask import Blueprint, Response, abort, jsonify, request
 from flask_httpauth import HTTPBasicAuth
+from io import TextIOWrapper
 
 from app import app
 from model import db, User
@@ -35,22 +37,101 @@ def verify_password(email, password):
     return False
 
 @auth.login_required
-@admin_bp.route("/admin/create", methods=["POST"])
+@admin_bp.route("/admin/user/create", methods=["POST"])
 def createAdmin():
     '''
     Add a new admin
 
-    Requires authentication via auth header
+    Request body:
+    {
+        "email": "
+        "password": "
+    }
     '''
 
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    if not email or not password:
+        return abort(400, "Bad Request: Missing query parameters")
+
     salt = binascii.hexlify(os.urandom(64)).decode()
-    salted_password = password + salt   # TODO: put in actual password from auth header
+    salted_password = password + salt  
     hashed_password = bcrypt.generate_password_hash(salted_password).decode('utf-8') 
 
-    # TODO: store salt and hashed password in database
-    return "Not implemented"
+    newUser = User()
+    newUser.email = email
+    newUser.password = hashed_password
+    newUser.salt = salt
+    newUser.isAdmin = True
 
-@admin_bp.route("/", methods=["GET"])
+    db.session.add(newUser)
+    db.session.commit()
+
+    return jsonify({'message': 'Admin succesfully created'}), 200
+
+@auth.login_required
+@admin_bp.route("/admin/loadFoodLog", methods=["PUT"])
+def loadFoodLog():
+    '''
+    Load a food log csv file into the database
+
+    Request body:
+    {
+        "file": csv file
+    }
+    
+    Query parameters:
+    {
+        "type": restaraunt | butcher
+    }
+    '''
+    csvfile = request.files.get("foodlog")
+    serviceType = request.args.get("type")
+
+    if not csvfile or not serviceType:
+        return abort(400, "Bad Request: Missing query parameters")
+    
+    if serviceType != "restaraunt" and serviceType != "butcher":
+        return abort(400, "Bad Request: Invalid service type")
+
+    # TODO:
+    # Will need to find relevant type and halal status tables
+    # build associated location, contact, status history, service supplier, tag junction tables
+
+    # Convert the file to a TextIOWrapper object
+    csvfile = TextIOWrapper(csvfile.stream, encoding='utf-8')
+
+    # Skip the read me
+    for line in csvfile:
+        if line.strip().startswith('Butcher Name') or line.strip().startswith('Restaurant Name'):
+            csvfile.seek(csvfile.tell() - len(line))  # rewind to start of line
+            break
+
+    # Read the CSV file
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        name = row['Butcher Name'] if serviceType == "butcher" else row['Restaurant Name']
+        contact_details = row['Contact Details'].split('\n')
+        address = contact_details[0]
+        phone = contact_details[1]
+        status = row['Status']
+        supplier = row['Supplier']
+        last_contacted = row['Last Contacted']
+        notes = row['Notes']
+
+        return jsonify({
+            "name": name,
+            "address": address,
+            "phone": phone,
+            "status": status,
+            "supplier": supplier,
+            "last_contacted": last_contacted,
+            "notes": notes
+        })
+
+    return jsonify({'message': 'Loadsheet succesfully loaded'}), 200
+
 def index() -> Response:
     '''
     Template route

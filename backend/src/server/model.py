@@ -25,6 +25,7 @@ class FoodService(db.Model):
     locations = relationship('Location', backref='food_service', cascade='all, delete')
     contact = relationship('Contact', backref='food_service', cascade='all, delete')
     statusHistory = relationship('StatusHistory', backref='food_service', cascade='all, delete')
+
     serviceSupplier = relationship('ServiceSupplier', backref='food_service', cascade='all, delete')
     foodServiceTagJunction = relationship('FoodServiceTagJunction', backref='food_service', cascade='all, delete')
 
@@ -98,8 +99,8 @@ class Location(db.Model):
     city = db.Column(db.String, nullable=False)
     state = db.Column(db.String, nullable=False)
     country = db.Column(db.String, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
-    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
         return f"<Location {self.street}, {self.postCode}, {self.city}, {self.state}>"

@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from os import getenv, path
 from typing import Tuple
 
-from admin.routes import admin_bp
+from admin.routes import admin_bp, init_bcyrpt  
 from main.routes import main_bp
 from model import db, User
 
@@ -22,6 +22,7 @@ env = dotenv_values(envPath)
 
 # Set up the flask app 
 app = Flask(__name__)
+init_bcyrpt(app)
 db_url = env["DATABASE_URL"]
 print(db_url)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
@@ -36,34 +37,6 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 @api_bp.route("/", methods=["GET"])
 def index() -> Response:
     return jsonify({"api_version": "1.0.0"})
-
-    
-@api_bp.route("/users", methods=["GET"])
-def getUser() -> Response:
-
-    # Get id given as query string
-    userID = request.args.get('userID')
-
-    if (userID == None):
-        # If no ID was given
-        users = User.query.all()
-        userList = []
-        for user in users:
-            userList.append({"id": user.id,
-                            "email": user.email,
-                            "isAdmin": user.isAdmin})
-        userJson = {"users": userList}
-        return jsonify(userJson)
-    else:
-        # If ID was given
-        user = User.query.get(userID)
-        if (user == None):
-            abort(404, "User of given userID could not be found")
-        return jsonify({
-            "email": user.email,
-            "isAdmin": user.isAdmin
-    })
-
 
 # Register all blueprints
 app.register_blueprint(api_bp)

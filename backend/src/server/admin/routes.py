@@ -1,25 +1,33 @@
+import datetime
 import os
 import binascii
 import csv
 from flask_bcrypt import Bcrypt
 from flask import Blueprint, Response, abort, jsonify, request
 from flask_httpauth import HTTPBasicAuth
-from io import TextIOWrapper
+from io import TextIOWrapper, BytesIO, StringIO
 
-from app import app
-from model import db, User
+from model import db, User, FoodService, ServiceType, HalalStatus, Location, Contact, StatusHistory, ServiceSupplier, FoodServiceTagJunction, ServiceTag, Supplier
 
 ###
 # File containing all the routes relating to operations by admins. Ensure that
 # all routes have been implemented with security in mind.
 #
 # All routes in this file should have a url prefix of /api/admin
+#
+# Authentication details are sent in an auth field
 ###
 
 auth = HTTPBasicAuth()
-bcrypt = Bcrypt(app)
+bcrypt = Bcrypt()
 
 admin_bp = Blueprint("admin", import_name=__name__, url_prefix="/api/admin")
+
+def init_bcyrpt(app):
+    '''
+    Initialise the bcrypt object
+    '''
+    bcrypt.init_app(app)
 
 @auth.verify_password
 def verify_password(email, password):
@@ -36,8 +44,8 @@ def verify_password(email, password):
         return True
     return False
 
+@admin_bp.route("/user/create", methods=["POST"])
 @auth.login_required
-@admin_bp.route("/admin/user/create", methods=["POST"])
 def createAdmin():
     '''
     Add a new admin
@@ -70,15 +78,21 @@ def createAdmin():
 
     return jsonify({'message': 'Admin succesfully created'}), 200
 
+@admin_bp.route("/loadFoodLog", methods=["PUT"])
 @auth.login_required
-@admin_bp.route("/admin/loadFoodLog", methods=["PUT"])
 def loadFoodLog():
     '''
-    Load a food log csv file into the database
+    Load a food log csv file into the database.
+
+    Note: Extremely fragile code and will break if headers of csv change, etc.
+    Only designed to be used once or twice for initial data loading.
+    Sincerest apologies to the person who has to use this code later, probably myself in the future.
+    Things just don't work but they work enough. Data from logs has to be cleaned before manually. Also this code
+    may add unnamed suppliers to the database.
 
     Request body:
     {
-        "file": csv file
+        "foodlog": csv file
     }
     
     Query parameters:
@@ -86,49 +100,189 @@ def loadFoodLog():
         "type": restaraunt | butcher
     }
     '''
+
+    # Arguments parsing
     csvfile = request.files.get("foodlog")
     serviceType = request.args.get("type")
 
-    if not csvfile or not serviceType:
-        return abort(400, "Bad Request: Missing query parameters")
+    if not csvfile:
+        return abort(400, "Bad Request: Missing csv file")
     
-    if serviceType != "restaraunt" and serviceType != "butcher":
-        return abort(400, "Bad Request: Invalid service type")
+    if not serviceType:
+        return abort(400, "Bad Request: Missing service type query parameter")
+    
+    serviceType = serviceType.title()
 
-    # TODO:
-    # Will need to find relevant type and halal status tables
-    # build associated location, contact, status history, service supplier, tag junction tables
+    if serviceType != "Restaurant" and serviceType != "Butcher":
+        return abort(400, "Bad Request: Invalid service type - " + serviceType)
 
-    # Convert the file to a TextIOWrapper object
-    csvfile = TextIOWrapper(csvfile.stream, encoding='utf-8')
+    # Convert the file to a useable file type
+    csvfile = BytesIO(csvfile.read())
+    csvfile = TextIOWrapper(csvfile, encoding='utf-8')
 
     # Skip the read me
-    for line in csvfile:
+    lines = csvfile.readlines()
+    for i, line in enumerate(lines):
         if line.strip().startswith('Butcher Name') or line.strip().startswith('Restaurant Name'):
-            csvfile.seek(csvfile.tell() - len(line))  # rewind to start of line
+            csvfile = StringIO(''.join(lines[i:]))
             break
 
     # Read the CSV file
     reader = csv.DictReader(csvfile)
     for row in reader:
-        name = row['Butcher Name'] if serviceType == "butcher" else row['Restaurant Name']
-        contact_details = row['Contact Details'].split('\n')
-        address = contact_details[0]
-        phone = contact_details[1]
-        status = row['Status']
-        supplier = row['Supplier']
+        name = row['Butcher Name'] if serviceType == "Butcher" else row['Restaurant Name']
+        # Initialise variables
+        phone = None
+        website = None
+        if serviceType == 'Butcher':
+            contact_details = row['Contact Details\n(Address, Phone, Website)'].split('\n')
+            address = contact_details[0]
+            phone = contact_details[1] if len(contact_details) > 1 else None
+            website = contact_details[2] if len(contact_details) > 2 else None
+        else:
+            address = row['Address']
+        status = row['Status'].title()
+        suppliers = row['Supplier']
         last_contacted = row['Last Contacted']
-        notes = row['Notes']
+        notes = row['Notes & other enquiry details']
+        coordinates = row['Coordinates']
 
-        return jsonify({
-            "name": name,
-            "address": address,
-            "phone": phone,
-            "status": status,
-            "supplier": supplier,
-            "last_contacted": last_contacted,
-            "notes": notes
-        })
+
+        # If exists use the existing food service otherwise create a new one
+        foodService = FoodService.query.filter(FoodService.name.ilike(name)).first()
+        new_service = False
+        if not foodService:
+            foodService = FoodService()
+            new_service = True 
+
+        # Add food service table attribute
+        foodService.name = name
+        if last_contacted != '':
+            last_contacted = datetime.datetime.strptime(last_contacted, '%d/%m/%Y').date()
+        else: 
+            last_contacted = None
+        foodService.lastContacted = last_contacted
+        foodService.notes = notes
+
+        # Add many-to-one attributes
+        foodServiceType = ServiceType.query.filter(ServiceType.name.ilike(serviceType)).first()
+        if (foodServiceType == None):
+            foodServiceType = ServiceType()
+            foodServiceType.name = serviceType
+            db.session.add(foodServiceType)
+            db.session.flush()
+            db.session.refresh(foodServiceType)
+        foodService.type = foodServiceType.id
+
+        halalStatus = HalalStatus.query.filter(HalalStatus.name.ilike(status)).first()
+        if (halalStatus == None):
+            halalStatus = HalalStatus()
+            halalStatus.name = status
+            db.session.add(halalStatus)
+            db.session.flush()
+            db.session.refresh(halalStatus)
+        foodService.halalStatus = halalStatus.id
+
+        # Add new food service once main attributes are added
+        if new_service:
+            db.session.add(foodService)
+            db.session.flush()
+
+            # Allows us to grab id
+            db.session.refresh(foodService)
+
+        # Add the many-to-many attributes
+        # Add suppliers
+        # NOTE: Suppliers are hard because they are not formatted well in the csv
+        # A bit of hard coding involved
+        suppliersList = suppliers.split(',')
+        for supplier in suppliersList:
+            supplier = supplier.strip()
+
+            # NOTE: Here comes the fragile bit
+            supplierName = ""
+            if supplier in ['Fresh Poultry', 'Giglios', 'Self-Sourced', 'Cordina', 'MAM 100% Halaal', 'Apni Dukaan Australia', 'Sydney Kebabs', 'Steggles']:
+                supplierName = supplier
+            else:
+                supplierName = ""
+
+            supplierTable = Supplier.query.filter(Supplier.name.ilike(supplierName)).first()
+            if (supplierTable == None):
+                supplierTable = Supplier()
+                supplierTable.name = supplierName
+                db.session.add(supplierTable)
+            # Find if service supplier already exists
+            serviceSupplier = ServiceSupplier.query.filter_by(supplierID=supplierTable.id, serviceID=foodService.id).first()
+            if serviceSupplier == None:
+                serviceSupplier = ServiceSupplier()
+                db.session.flush()
+                db.session.refresh(supplierTable)
+                serviceSupplier.supplierID = supplierTable.id
+                serviceSupplier.serviceID = foodService.id
+                db.session.add(serviceSupplier)
+
+        # Tags are not in the csv file so no actual data added
+
+
+        # Add the one-to-many attributes
+        # Add history
+        newHistory = StatusHistory()
+        newHistory.serviceID = foodService.id
+        newHistory.halalStatus = halalStatus.id
+        if last_contacted != None:
+            newHistory.date = last_contacted
+        else:
+            newHistory.date = datetime.date.today()
+        db.session.add(newHistory)
+
+        # Add new location even if it already exists. Treated as a seperate location
+        newLocation  = Location()
+
+        address = address.split(',') 
+        streetLine = address[0]
+        suburb = address[1].split(' ')[:-3] # Accounts for multiple word suburbs
+        state = address[1].split(' ')[-2]
+        postcode = address[1].split(' ')[-1]
+
+        newLocation.street = streetLine
+        newLocation.city = 'Sydney' 
+        newLocation.state = state
+        newLocation.postCode = postcode
+        newLocation.country = 'Australia'
+
+        if (coordinates != '' and coordinates != None and coordinates != ' '):
+            coordinates = coordinates.split(',')
+            newLocation.latitude = coordinates[0][1:]
+            newLocation.longitude = coordinates[1].strip()[:-1]
+        newLocation.serviceID = foodService.id
+        db.session.add(newLocation)
+
+        # Add contact details
+        # Add phone if exists
+        if phone != None and serviceType=="Butcher":
+            phoneContact = Contact.query.filter_by(type='phone', value=phone).first()
+            if phoneContact == None:
+                phoneContact = Contact()
+                phoneContact.type = 'phone'
+                phoneContact.value = phone
+                db.session.add(phoneContact)
+            phoneContact.serviceID = foodService.id
+            db.session.add(phoneContact)
+
+        # Add website if exists
+        if website != None and serviceType=="Butcher":
+            websiteContact = Contact.query.filter_by(type='website', value=website).first()
+            if websiteContact == None:
+                websiteContact = Contact()
+                websiteContact.type = 'website'
+                websiteContact.value = website
+                db.session.add(websiteContact)
+            websiteContact.serviceID = foodService.id
+            db.session.add(websiteContact)
+
+
+
+        db.session.commit()
 
     return jsonify({'message': 'Loadsheet succesfully loaded'}), 200
 

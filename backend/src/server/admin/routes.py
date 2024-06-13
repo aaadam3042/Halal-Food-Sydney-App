@@ -7,7 +7,7 @@ from flask import Blueprint, Response, abort, jsonify, request
 from flask_httpauth import HTTPBasicAuth
 from io import TextIOWrapper, BytesIO, StringIO
 
-from model import db, User, FoodService, ServiceType, HalalStatus, Location, Contact, StatusHistory, ServiceSupplier, FoodServiceTagJunction, ServiceTag, Supplier
+from model import Broadcast, db, User, FoodService, ServiceType, HalalStatus, Location, Contact, StatusHistory, ServiceSupplier, FoodServiceTagJunction, ServiceTag, Supplier
 
 ###
 # File containing all the routes relating to operations by admins. Ensure that
@@ -23,11 +23,13 @@ bcrypt = Bcrypt()
 
 admin_bp = Blueprint("admin", import_name=__name__, url_prefix="/api/admin")
 
+
 def init_bcyrpt(app):
     '''
     Initialise the bcrypt object
     '''
     bcrypt.init_app(app)
+
 
 @auth.verify_password
 def verify_password(email, password):
@@ -43,6 +45,7 @@ def verify_password(email, password):
     if ( bcrypt.check_password_hash(db_user.password, salted_password)):
         return True
     return False
+
 
 @admin_bp.route("/user/create", methods=["POST"])
 @auth.login_required
@@ -77,6 +80,99 @@ def createAdmin():
     db.session.commit()
 
     return jsonify({'message': 'Admin succesfully created'}), 200
+
+
+@admin_bp.route("/broadcast/addMessage", methods=["PUT"])
+@auth.login_required
+def set_broadcast():
+    '''
+    Sets the broadcast message in the database
+
+    Request body:
+    {
+        "title": "String- Title of the broadcast",
+        "message": "String- Message to broadcast",
+        "broadcast_datetime": "String- Date and time to broadcast the message in the form of HH:MM DD/MM/YYYY",
+        "endBroadcast_datetime": "String- Date and time to broadcast the message in the form of HH:MM DD/MM/YYYY",
+        "[isImportant]": "Boolean- Is the message important - defaults to false"
+    }
+    '''
+    title = request.form.get("title")
+    message = request.form.get("message")
+    broadcast_datetime = request.form.get("broadcast_datetime")
+    endBroadcast_datetime = request.form.get("endBroadcast_datetime")
+    isImportant = request.form.get("isImportant")
+
+    if not title or not message or not broadcast_datetime or not endBroadcast_datetime:
+        return abort(400, "Bad Request: Missing query parameters")
+
+    # Parse isImportant
+    importantBool = None
+    if isImportant == None or isImportant.strip() == "" or isImportant.strip().lower() == "false":
+        importantBool = False
+    elif isImportant.strip().lower() == "true":
+        importantBool = True
+    if importantBool == None:
+        return abort(400, "Bad Request: isImportant should be a bool")
+    
+    # Parse the datetime
+    try:
+        broadcast_datetime = datetime.datetime.strptime(broadcast_datetime, "%H:%M %d/%m/%Y")
+        boradcast_date = broadcast_datetime.date()
+        broadcast_time = broadcast_datetime.time()
+        endBroadcast_datetime = datetime.datetime.strptime(endBroadcast_datetime, "%H:%M %d/%m/%Y")
+        end_broadcast_date = endBroadcast_datetime.date()
+        end_broadcast_time = endBroadcast_datetime.time()
+    except ValueError:
+        return abort(400, "Bad Request: Invalid date format")
+    
+    # Make sure the title is unique
+    if Broadcast.query.filter_by(title=title).first():
+        return abort(400, "Bad Request: Title already exists")
+
+    # Add the broadcast to the database
+    newBroadcast = Broadcast()
+    newBroadcast.title = title
+    newBroadcast.message = message
+    newBroadcast.startDate = boradcast_date
+    newBroadcast.startTime = broadcast_time
+    newBroadcast.endDate = end_broadcast_date
+    newBroadcast.endTime = end_broadcast_time
+    newBroadcast.isImportant = importantBool
+
+    db.session.add(newBroadcast)
+    db.session.commit()
+
+    # Question is whether date and time should be used as a the time when the message gets broadcasted or the time it was created
+    # Also hard to make auto close messages as stateless
+    return jsonify({'message': 'Broadcast message succesfully added'}), 200
+
+
+@admin_bp.route("/broadcast/deleteMessage", methods=["DELETE"])
+@auth.login_required
+def delete_broadcast():
+    '''
+    Delete a broadcast message from the database
+
+    Request body:
+    {
+        "title": "String- Title of the broadcast"
+    }
+    '''
+    title = request.form.get("title")
+
+    if not title:
+        return abort(400, "Bad Request: Missing query parameters")
+
+    broadcast = Broadcast.query.filter_by(title=title).first()
+    if not broadcast:
+        return abort(404, "Not Found: Broadcast message not found")
+
+    db.session.delete(broadcast)
+    db.session.commit()
+
+    return jsonify({'message': 'Broadcast message succesfully deleted'}), 200
+
 
 @admin_bp.route("/loadFoodLog", methods=["PUT"])
 @auth.login_required

@@ -3,6 +3,19 @@ from sqlalchemy.orm import relationship
 
 db = SQLAlchemy() 
 
+class Broadcast(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False, unique=True)
+    message = db.Column(db.String, nullable=False)
+    startDate = db.Column(db.date, nullable=False)
+    startTime = db.Column(db.Time, nullable=False)
+    endDate = db.Column(db.date, nullable=False)
+    endTime = db.Column(db.Time, nullable=False)
+    isImportant = db.Column(db.Boolean, nullable=False)
+    
+    def __repr__(self):
+        return f"<Broadcast {self.title}>"
+
 class User(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=False)

@@ -7,9 +7,9 @@ class Broadcast(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False, unique=True)
     message = db.Column(db.String, nullable=False)
-    startDate = db.Column(db.date, nullable=False)
+    startDate = db.Column(db.Date, nullable=False)
     startTime = db.Column(db.Time, nullable=False)
-    endDate = db.Column(db.date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
     endTime = db.Column(db.Time, nullable=False)
     isImportant = db.Column(db.Boolean, nullable=False)
     

@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from geoalchemy2 import Geometry
 from sqlalchemy.orm import relationship
-
 db = SQLAlchemy() 
 
 class Broadcast(db.Model):
@@ -15,7 +15,6 @@ class Broadcast(db.Model):
     
     def __repr__(self):
         return f"<Broadcast {self.title}>"
-
 class User(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=False)
@@ -112,8 +111,9 @@ class Location(db.Model):
     city = db.Column(db.String, nullable=False)
     state = db.Column(db.String, nullable=False)
     country = db.Column(db.String, nullable=False)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    geom = db.Column(Geometry(geometry_type='POINT', srid=4326), nullable=True)
 
     def __repr__(self):
         return f"<Location {self.street}, {self.postCode}, {self.city}, {self.state}>"

@@ -11,7 +11,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+fileConfig(config.config_file_name) # type: ignore
 logger = logging.getLogger('alembic.env')
 
 
@@ -51,6 +51,13 @@ def get_metadata():
     return target_db.metadata
 
 
+def include_object(object, name, type_, reflected, compare_to):    
+    if type_ == "table" and name == 'spatial_ref_sys':
+        return False
+    else:
+        return True
+    
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -65,7 +72,7 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=get_metadata(), literal_binds=True
+        url=url, target_metadata=get_metadata(), literal_binds=True, include_object=include_object
     )
 
     with context.begin_transaction():
@@ -97,7 +104,8 @@ def run_migrations_online():
             connection=connection,
             target_metadata=get_metadata(),
             process_revision_directives=process_revision_directives,
-            **current_app.extensions['migrate'].configure_args
+            **current_app.extensions['migrate'].configure_args,
+            include_object=include_object
         )
 
         with context.begin_transaction():

@@ -15,6 +15,7 @@ class Broadcast(db.Model):
     
     def __repr__(self):
         return f"<Broadcast {self.title}>"
+    
 class User(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=False)

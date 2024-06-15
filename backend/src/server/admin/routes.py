@@ -105,6 +105,9 @@ def set_broadcast():
 
     if not title or not message or not broadcast_datetime or not endBroadcast_datetime:
         return abort(400, "Bad Request: Missing query parameters")
+    
+    if title.strip() == "":
+        return abort(400, "Bad Request: Title cannot be empty")
 
     # Parse isImportant
     importantBool = None
@@ -235,13 +238,20 @@ def loadFoodLog():
             address = contact_details[0]
             phone = contact_details[1] if len(contact_details) > 1 else None
             website = contact_details[2] if len(contact_details) > 2 else None
-        else:
+        elif serviceType == 'Restaurant':
             address = row['Address']
+        else:
+            return abort(400, "Bad Request: Invalid service type - " + serviceType)
         status = row['Status'].title()
         suppliers = row['Supplier']
         last_contacted = row['Last Contacted']
         notes = row['Notes & other enquiry details']
         coordinates = row['Coordinates']
+
+        if name.strip() == '':
+            continue
+        if status.strip() == '':
+            return abort(400, "Bad Request: Issue with file, status is empty for some entries.")
 
 
         # If exists use the existing food service otherwise create a new one
@@ -299,8 +309,9 @@ def loadFoodLog():
             supplierName = ""
             if supplier in ['Fresh Poultry', 'Giglios', 'Self-Sourced', 'Cordina', 'MAM 100% Halaal', 'Apni Dukaan Australia', 'Sydney Kebabs', 'Steggles']:
                 supplierName = supplier
-            else:
-                supplierName = ""
+
+            if supplierName == "":
+                continue
 
             supplierTable = Supplier.query.filter(Supplier.name.ilike(supplierName)).first()
             if (supplierTable == None):
@@ -332,6 +343,9 @@ def loadFoodLog():
         db.session.add(newHistory)
 
         # Add new location even if it already exists. Treated as a seperate location
+        if address.strip() == '':
+            return abort(400, "Bad Request: Issue with file, address is empty for some entries.")
+
         newLocation  = Location()
 
         address = address.split(',') 
@@ -355,7 +369,7 @@ def loadFoodLog():
 
         # Add contact details
         # Add phone if exists
-        if phone != None and serviceType=="Butcher":
+        if phone != None and serviceType=="Butcher" and phone.strip() != '':
             phoneContact = Contact.query.filter_by(type='phone', value=phone).first()
             if phoneContact == None:
                 phoneContact = Contact()
@@ -366,7 +380,7 @@ def loadFoodLog():
             db.session.add(phoneContact)
 
         # Add website if exists
-        if website != None and serviceType=="Butcher":
+        if website != None and serviceType=="Butcher" and website.strip() != '':
             websiteContact = Contact.query.filter_by(type='website', value=website).first()
             if websiteContact == None:
                 websiteContact = Contact()

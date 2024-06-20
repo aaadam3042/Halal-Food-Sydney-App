@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask import Blueprint, Response, abort, jsonify, request
 from flask_httpauth import HTTPBasicAuth
 from io import TextIOWrapper, BytesIO, StringIO
-
+from geoalchemy2 import functions as func
 from model import Broadcast, db, User, FoodService, ServiceType, HalalStatus, Location, Contact, StatusHistory, ServiceSupplier, FoodServiceTagJunction, ServiceTag, Supplier
 
 ###
@@ -175,6 +175,22 @@ def delete_broadcast():
     db.session.commit()
 
     return jsonify({'message': 'Broadcast message succesfully deleted'}), 200
+
+
+@admin_bp.route("/generateGeometry", methods=["PUT"])
+@auth.login_required
+def generate_geometry():
+    '''
+    Generate the geometry for all the locations in the database
+    '''
+    locations = Location.query.all()
+    for location in locations:
+        if location.latitude and location.longitude:
+            location.geom = func.ST_SetSRID(func.ST_MakePoint(location.longitude, location.latitude), 4326)
+            db.session.add(location)    
+    db.session.commit()
+
+    return jsonify({'message': 'Geometry succesfully generated'}), 200
 
 
 @admin_bp.route("/loadFoodLog", methods=["PUT"])

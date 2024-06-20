@@ -181,7 +181,8 @@ def delete_broadcast():
 @auth.login_required
 def generate_geometry():
     '''
-    Generate the geometry for all the locations in the database
+    Generate the geometry for all the locations in the database. One off function ideally.
+    Shouldn't need to use it in future as geom is now non nullable.
     '''
     locations = Location.query.all()
     for location in locations:

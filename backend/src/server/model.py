@@ -114,7 +114,7 @@ class Location(db.Model):
     country = db.Column(db.String, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
-    geom = db.Column(Geometry(geometry_type='POINT', srid=4326), nullable=True)
+    geom = db.Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
 
     def __repr__(self):
         return f"<Location {self.street}, {self.postCode}, {self.city}, {self.state}>"

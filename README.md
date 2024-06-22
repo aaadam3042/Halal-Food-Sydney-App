@@ -3,8 +3,8 @@ Python/Javascript web application providing a directory of halal location in
 Sydeny, Australia.
 
 ## Technology
-This project is built on top of React Native, Flask and Postgresql.
-Additionally the React Native Paper library is used to speed up development.
+This project is built on top of React, Flask and Postgresql.
+Additionally Material UI and tailwind is used to speed up development.
 
 ---
 

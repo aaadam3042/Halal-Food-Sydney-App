@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { useError } from '@contexts/ErrorContext';
+import LocationSearchBar from '@components/LocationSearchBar';
 
 export function HomePage() {
 
   	return (
-	<>
+	<>	
+		<LocationSearchBar />
+		<LocationSearchBar />
+		<LocationSearchBar />
 		<h1>Home Page</h1>
 		<p>This is the home page</p>
 	</>

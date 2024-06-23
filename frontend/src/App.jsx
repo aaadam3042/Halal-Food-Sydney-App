@@ -11,11 +11,14 @@ function App() {
 	<ErrorProvider>
 		<ErrorPopup />
 		  <Router>
+		  	<NavBar />
 			<Routes>
 				<Route path="/" element={<HomePage />} />
+				<Route path="/map" element={<h1>Not Found</h1>} />
+				<Route path="/list" element={<h1>Not </h1>} />
+				<Route path="/settings" element={<h1> Found</h1>} />
 			</Routes>
 		  </Router>
-		  <NavBar />
 	</ErrorProvider>
 	</>
   )

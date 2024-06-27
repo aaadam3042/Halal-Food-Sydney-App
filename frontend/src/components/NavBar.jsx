@@ -1,4 +1,4 @@
-import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
+import { BottomNavigation, BottomNavigationAction, Box, styled } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 // Icon names found at: https://mui.com/material-ui/material-icons/
@@ -9,6 +9,7 @@ import { Settings as SettingsIcon } from '@mui/icons-material';
 
 export function NavBar() {
     let navigate = useNavigate();
+    const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
     return (
     <>
@@ -20,6 +21,7 @@ export function NavBar() {
         <BottomNavigationAction label="Settings" icon={<SettingsIcon  fontSize="large"/>} onClick={() => navigate("/settings")} />
     </BottomNavigation>
     </Box>
+    <Offset />
     </>
     );
 }

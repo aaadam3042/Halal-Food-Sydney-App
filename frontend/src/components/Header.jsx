@@ -1,13 +1,20 @@
-import { AppBar, Typography } from '@mui/material';
+import { AppBar, Box, Button, Toolbar, Typography, styled } from '@mui/material';
 
 export function Header() {
+    const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
     return(
     <>
-        <AppBar position="fixed">
-            <Typography variant="h4" component="div" padding={2} sx={{ flexGrow: 1 }}>
-                Halal Food Sydney 
-            </Typography>
-        </AppBar>
+        <Box sx={{flexGrow: 1}}>
+            <AppBar position="fixed">
+                <Toolbar>
+                <Typography variant="h4" component="div" padding={2} sx={{ flexGrow: 1 }}>
+                    Halal Food Sydney 
+                </Typography>
+                <Button> login </Button>
+                </Toolbar>
+            </AppBar>
+            <Offset />
+        </Box>
     </>
     );
 }

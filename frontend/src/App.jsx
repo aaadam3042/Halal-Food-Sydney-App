@@ -12,14 +12,14 @@ function App() {
 	<ErrorProvider>
 		<ErrorPopup />
 		<Router>
-			<Header />	{/* It is more appropriate i think to make header and footer objects, and pass items needed in such as location bar and navbar - think semantically does it make sense for the location bar to be ap art of the header? no? but placewise does it? ?? */}
-			<NavBar />
+			<Header />
 			<Routes>
 				<Route path="/" element={<HomePage />} />
 				<Route path="/map" element={<h1>Not Found</h1>} />
 				<Route path="/list" element={<h1>Not </h1>} />
 				<Route path="/settings" element={<h1> Found</h1>} />
 			</Routes>
+			<NavBar />
 		</Router>
 	</ErrorProvider>
 	</>

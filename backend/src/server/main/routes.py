@@ -133,8 +133,8 @@ def get_restaurants_nearby():
             'city': location.Location.city,
             'state': location.Location.state,
             'halalStatus': location.HalalStatus.name,
-            'distance': location.distance
-        }   # TODO: fix in butcher as well cards don't need to show contact, but good to show openTime 
+            'distance': location.distance,
+        }  
         for location in nearby_locations
     ]
 
@@ -208,17 +208,31 @@ def get_butchers_nearby():
 
     # Query for nearby locations
     user_point = func.ST_SetSRID(func.ST_MakePoint(user_lon, user_lat), 4326)
-    nearby_locations = FoodService.query.filter(func.ST_DWithin(Location.geom, user_point, distance)).filter_by(type=serviceType.id).all()
+    nearby_locations = FoodService.query \
+        .add_entity(Location) \
+        .add_entity(HalalStatus) \
+        .add_entity(func.ST_Distance(cast(Location.geom, Geography("Point", 4326)), cast(user_point, Geography("Point", 4326))).label('distance')) \
+        .join(Location, FoodService.id == Location.serviceID) \
+        .join(HalalStatus, FoodService.halalStatus == HalalStatus.id) \
+        .filter(FoodService.type == serviceType.id) \
+        .filter(func.ST_DWithin(cast(Location.geom, Geography("Point", 4326)), cast(user_point, Geography("Point", 4326)), distance)) \
+        .order_by('distance') \
+        .paginate(page=pageNumber, per_page=pageCount) 
 
     # Build response
     response_locations = [
         {
-            'name': location.name,
-            'lastContacted': location.lastContacted,
-            'notes': location.notes,
-            'type': location.type,
-            'halalStatus': location.halalStatus
-        }
+            'name': location.FoodService.name,
+            'lastContacted': location.FoodService.lastContacted,
+            'notes': location.FoodService.notes,
+            'halalStatus': location.FoodService.halalStatus,
+            'street': location.Location.street,
+            'postcode': location.Location.postCode,
+            'city': location.Location.city,
+            'state': location.Location.state,
+            'halalStatus': location.HalalStatus.name,
+            'distance': location.distance,
+        }  
         for location in nearby_locations
     ]
 

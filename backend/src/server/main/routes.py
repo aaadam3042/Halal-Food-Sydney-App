@@ -1,7 +1,9 @@
 import datetime
 from flask import Blueprint, Response, abort, jsonify, request
-from model import Broadcast, FoodService, ServiceType
+from model import db, Broadcast, FoodService, HalalStatus, Location, ServiceType
 from geoalchemy2 import functions as func
+from geoalchemy2 import Geography
+from sqlalchemy import cast, select
 
 ###
 # File containing all the routes relating to operations by generic users.
@@ -74,11 +76,25 @@ def get_restaurants_nearby():
     Returns a list of all restaurants in the database that are nearby.
 
     Query Parameters:
-    location: The location of the user.
+    pageCount?: Number of items per page. Default 3
+    pageNumber?: Current page of items. Default 1
+    lat: The latitude of the user.
+    lon: The longitude of the user.
     distance: The distance in meters from the user's location.
     '''
 
     # Parse args
+    pageCount = request.args.get('pageCount', type=int)
+    if not pageCount:
+        pageCount = 3 # Default
+    if pageCount <= 0:
+        return abort(400, description="Page count invalid - must be greater than 0.")
+    pageNumber = request.args.get('pageNumber', type=int)
+    if not pageNumber:
+        pageNumber = 1 # Default
+    if pageNumber <= 0: 
+        return abort(400, description="Page number invalid - must be greater than 0")
+    
     distance = request.args.get('distance', type=float)
     if not distance:
         return abort(400, description="Distance query parameter is required.")
@@ -94,17 +110,31 @@ def get_restaurants_nearby():
 
     # Query for nearby locations
     user_point = func.ST_SetSRID(func.ST_MakePoint(user_lon, user_lat), 4326)
-    nearby_locations = FoodService.query.filter(func.ST_DWithin(FoodService.location.geom, user_point, distance)).filter_by(type=serviceType.id).all()
+    nearby_locations = FoodService.query \
+        .add_entity(Location) \
+        .add_entity(HalalStatus) \
+        .add_entity(func.ST_Distance(cast(Location.geom, Geography("Point", 4326)), cast(user_point, Geography("Point", 4326))).label('distance')) \
+        .join(Location, FoodService.id == Location.serviceID) \
+        .join(HalalStatus, FoodService.halalStatus == HalalStatus.id) \
+        .filter(FoodService.type == serviceType.id) \
+        .filter(func.ST_DWithin(cast(Location.geom, Geography("Point", 4326)), cast(user_point, Geography("Point", 4326)), distance)) \
+        .order_by('distance') \
+        .paginate(page=pageNumber, per_page=pageCount) 
 
     # Build response
     response_locations = [
         {
-            'name': location.name,
-            'lastContacted': location.lastContacted,
-            'notes': location.notes,
-            'type': location.type,
-            'halalStatus': location.halalStatus
-        }
+            'name': location.FoodService.name,
+            'lastContacted': location.FoodService.lastContacted,
+            'notes': location.FoodService.notes,
+            'halalStatus': location.FoodService.halalStatus,
+            'street': location.Location.street,
+            'postcode': location.Location.postCode,
+            'city': location.Location.city,
+            'state': location.Location.state,
+            'halalStatus': location.HalalStatus.name,
+            'distance': location.distance
+        }   # TODO: fix in butcher as well cards don't need to show contact, but good to show openTime 
         for location in nearby_locations
     ]
 
@@ -145,10 +175,24 @@ def get_butchers_nearby():
     Returns a list of all butchers in the database that are nearby.
 
     Query Parameters:
-    location: The location of the user.
+    pageCount?: Number of items per page. Default 3
+    pageNumber?: Current page of items. Default 1
+    lat: The latitude of the user.
+    lon: The longitude of the user.
     distance: The distance in meters from the user's location.
     '''
     # Parse args
+    pageCount = request.args.get('pageCount', type=int)
+    if not pageCount:
+        pageCount = 3 # Default
+    if pageCount < 0:
+        return abort(400, description="Page count invalid - must be greater than 0.")
+    pageNumber = request.args.get('pageNumber', type=int)
+    if not pageNumber:
+        pageNumber = 1 # Default
+    if pageNumber < 0: 
+        return abort(400, description="Page number invalid - must be greater than 0")
+    
     distance = request.args.get('distance', type=float)
     if not distance:
         return abort(400, description="Distance query parameter is required.")
@@ -164,7 +208,7 @@ def get_butchers_nearby():
 
     # Query for nearby locations
     user_point = func.ST_SetSRID(func.ST_MakePoint(user_lon, user_lat), 4326)
-    nearby_locations = FoodService.query.filter(func.ST_DWithin(FoodService.location.geom, user_point, distance)).filter_by(type=serviceType.id).all()
+    nearby_locations = FoodService.query.filter(func.ST_DWithin(Location.geom, user_point, distance)).filter_by(type=serviceType.id).all()
 
     # Build response
     response_locations = [

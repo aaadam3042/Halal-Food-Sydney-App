@@ -14,12 +14,12 @@ export function ServiceCard({title, services, banner}) {
     
     return (
     <>
-    <Paper elevation={3} sx={{borderRadius: 2.5, backgroundColor: "#a0998e", margin: "15px 20px 15px 20px", width: "400px"}} >
+    <Paper elevation={3} sx={{borderRadius: 2.5, backgroundColor: "#a0998e", margin: "15px 20px 15px 20px", width: "350px", alignSelf: "center"}} >
         <Stack>
             <Paper elevation={4} square sx={{borderRadius: "10px 10px 0 0", alignContent: "center", position: "relative", height: 40, backgroundColor: "transparent", marginBottom: 0.5}}>
                 <Box position="absolute" top="0px" bottom="0px" left="0px" right="0px" zIndex={1} borderRadius="10px 10px 0 0" style={{backgroundImage:`url(${banner})`, backgroundSize: "cover", height: 40, filter: "blur(1px)"}} />
                 <Stack direction="row" justifyContent="space-between">
-                    <Typography alignContent="center" paddingLeft={2} color="white" fontWeight="bolder" zIndex={3}>
+                    <Typography alignContent="center" paddingLeft={2} color="white" fontWeight="bolder" zIndex={3} alignSelf="center">
                         {title} 
                     </Typography>
                     <DoubleRightArrowIcon fontSize="large" sx={{zIndex: 3}}/>

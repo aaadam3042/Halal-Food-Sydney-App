@@ -7,7 +7,7 @@ export function Header() {
         <Box sx={{flexGrow: 1}}>
             <AppBar position="fixed">
                 <Toolbar>
-                <Typography variant="h4" component="div" padding={2} sx={{ flexGrow: 1 }}>
+                <Typography variant="h5" component="div" padding={2} sx={{ flexGrow: 1 }}>
                     Halal Food Sydney 
                 </Typography>
                 <Button> login </Button>

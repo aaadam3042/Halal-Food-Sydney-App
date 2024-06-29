@@ -1,7 +1,9 @@
+import { useMediaQuery } from 'react-responsive'
 import LocationSearchBar from '@components/LocationSearchBar';
 import { ServiceCard } from '@components/ServiceCard';
 import RestaurantBanner from "@assets/RestaurantBanner.png"
 import ButcherBanner from "@assets/ButcherBanner.png"
+import { Stack } from '@mui/material';
 
 let restaurantServices = [
 	{id:1, name: "Ahmad's Bakery", distance: '0.6', openTime:'4am-12pm', phone: '+61400000000', email: 'abcd@bc.com', halalStatus: 'Verified - Halal'}, 
@@ -10,12 +12,19 @@ let restaurantServices = [
 ]
 
 export function HomePage() {
+	const isBigScreen = useMediaQuery({query: '(min-width: 1024px)'})
+    let cardDirection = "column"
+    if (isBigScreen) {
+        cardDirection = "row"
+    }
 
   	return (
 	<>	
 		<LocationSearchBar />
+		<Stack direction={cardDirection}>
 		<ServiceCard title="Restaurants" services={restaurantServices} banner={RestaurantBanner} />
 		<ServiceCard title="Butchers" services={restaurantServices} banner={ButcherBanner} />
+		</Stack>
 	</>
   	);
 }
